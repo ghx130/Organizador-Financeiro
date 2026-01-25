@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Nossas Finanças</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="dash-header">
+    <div class="dash-left">
+      <h2>Nossas Finanças</h2>
+      <p class="dash-sub">Acompanhe metas e progresso para nossa casa</p>
+    </div>
+    <div class="dash-right">
+      <div class="user">Olá, <span id="userName">...</span></div>
+      <button id="logoutBtn" class="btn small">Sair</button>
+    </div>
+  </header>
+
+  <main class="dash-main container">
+    <section class="overview">
+      <div class="card small-card">
+        <h3>Saldo atual</h3>
+        <p class="big" id="currentBalance">R$ 0,00</p>
+      </div>
+      <div class="card small-card">
+        <h3>Meta — Entrada da casa</h3>
+        <p id="goalShort">R$ 0 de R$ 100.000</p>
+        <div class="progress"><div id="goalBar" class="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="card small-card">
+        <h3>Último mês</h3>
+        <p id="lastMonth">R$ 0,00</p>
+      </div>
+    </section>
+
+    <!-- gráficos removidos conforme solicitado -->
+
+    <section class="goals">
+      <div class="card">
+        <h3>Metas detalhadas</h3>
+        <ul id="goalsList" class="goals-list"></ul>
+      </div>
+    </section>
+  </main>
+  
+  <!-- botão de três pontinhos para abrir painel lateral -->
+  <button id="moreBtn" class="more-btn" aria-label="Mais opções">⋯</button>
+  
+  <!-- botão de organizador de finanças -->
+  <button id="financeBtn" class="finance-btn" aria-label="Organizador de Finanças">💰</button>
+
+  <!-- painel lateral: móveis / compras -->
+  <aside id="sidePanel" class="side-panel" aria-hidden="true">
+    <div class="side-header">
+      <h3>Móveis & Compras</h3>
+      <button id="closePanel" class="close-btn" aria-label="Fechar painel">✕</button>
+    </div>
+    <div class="side-body">
+      <div class="filters">
+        <button class="filter active" data-filter="all">Todos</button>
+        <button class="filter" data-filter="todo">A comprar</button>
+        <button class="filter" data-filter="bought">Comprados</button>
+      </div>
+      <div class="add-item">
+        <input id="newItemInput" placeholder="Adicionar item (ex: Sofá)" />
+        <select id="newItemCategory" aria-label="Categoria">
+          <option value="cozinha">Cozinha</option>
+          <option value="banheiro">Banheiro</option>
+          <option value="mobilia">Mobiliário</option>
+          <option value="quarto">Quarto</option>
+          <option value="outros">Outros</option>
+        </select>
+        <button id="addItemBtn" class="btn small">Adicionar</button>
+        <button id="addDefaultsBtn" class="btn small secondary" title="Adicionar itens padrão da categoria">Adicionar itens da categoria</button>
+      </div>
+      <ul id="furnitureList" class="furniture-list" aria-live="polite"></ul>
+    </div>
+  </aside>
+
+  <!-- backdrop para o painel (usado quando painel em tela cheia) -->
+  <div id="panelBackdrop" class="panel-backdrop" aria-hidden="true"></div>
+  
+  <!-- painel de finanças -->
+  <aside id="financePanel" class="finance-panel" aria-hidden="true">
+    <div class="finance-header">
+      <h3>💰 Organizador de Finanças</h3>
+      <button id="closeFinancePanel" class="close-btn" aria-label="Fechar painel">✕</button>
+    </div>
+    <div class="finance-tabs">
+      <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="tab-btn" data-tab="calculator">🔢 Calculadora</button>
+      <button class="tab-btn" data-tab="budget">💼 Orçamento</button>
+      <button class="tab-btn" data-tab="expenses">💸 Despesas</button>
+    </div>
+    <div class="finance-content">
+      <!-- ABA DASHBOARD -->
+      <div class="tab-content active" id="dashboard-tab">
+        <div class="dashboard-grid">
+          <!-- Resumo superior -->
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="summary-label">Total Orçado</div>
+              <div class="summary-value" id="totalBudget">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Total Gasto</div>
+              <div class="summary-value danger" id="totalSpent">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Saldo Disponível</div>
+              <div class="summary-value success" id="remainingBudget">R$ 0,00</div>
+            </div>
+          </div>
+
+          <!-- Gráficos -->
+          <div class="charts-container">
+            <div class="chart-card">
+              <h4>Despesas por Categoria</h4>
+              <canvas id="expenseChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h4>Orçamento vs Gasto</h4>
+              <canvas id="budgetChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Tabela de Orçamentos -->
+          <div class="table-card">
+            <h4>Status dos Orçamentos</h4>
+            <div id="budgetStatusTable" class="budget-status-table"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ABA CALCULADORA COMPACTA -->
+      <div class="tab-content" id="calculator-tab">
+        <div class="calculator-compact">
+          <div class="calc-display-compact" id="calcDisplay">0</div>
+          <div class="calc-buttons-compact">
+            <button class="calc-btn-compact" data-action="clear">C</button>
+            <button class="calc-btn-compact" data-action="delete">⌫</button>
+            <button class="calc-btn-compact operator" data-action="divide">÷</button>
+            <button class="calc-btn-compact operator" data-action="multiply">×</button>
+            
+            <button class="calc-btn-compact" data-value="7">7</button>
+            <button class="calc-btn-compact" data-value="8">8</button>
+            <button class="calc-btn-compact" data-value="9">9</button>
+            <button class="calc-btn-compact operator" data-action="subtract">−</button>
+            
+            <button class="calc-btn-compact" data-value="4">4</button>
+            <button class="calc-btn-compact" data-value="5">5</button>
+            <button class="calc-btn-compact" data-value="6">6</button>
+            <button class="calc-btn-compact operator" data-action="add">+</button>
+            
+            <button class="calc-btn-compact" data-value="1">1</button>
+            <button class="calc-btn-compact" data-value="2">2</button>
+            <button class="calc-btn-compact" data-value="3">3</button>
+            <button class="calc-btn-compact operator" data-action="percent">%</button>
+            
+            <button class="calc-btn-compact zero" data-value="0">0</button>
+            <button class="calc-btn-compact" data-value=".">.</button>
+            <button class="calc-btn-compact equals" data-action="equals">=</button>
+          </div>
+          <div class="calc-history-compact">
+            <h4>Histórico</h4>
+            <ul id="calcHistory" class="history-list"></ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ABA ORÇAMENTO -->
+      <div class="tab-content" id="budget-tab">
+        <div class="budget-section">
+          <h4>Adicionar Categoria de Orçamento</h4>
+          <div class="budget-form">
+            <input type="text" id="budgetName" placeholder="Nome da categoria (ex: Alimentação)" />
+            <input type="number" id="budgetAmount" placeholder="Valor" min="0" step="0.01" />
+            <button id="addBudgetBtn" class="btn small">Adicionar</button>
+          </div>
+          <div class="budgets-list" id="budgetsList"></div>
+        </div>
+      </div>
+      
+      <!-- ABA DESPESAS -->
+      <div class="tab-content" id="expenses-tab">
+        <div class="expenses-section">
+          <h4>Registrar Despesa</h4>
+          <div class="expense-form">
+            <input type="text" id="expenseDesc" placeholder="Descrição (ex: Supermercado)" />
+            <input type="number" id="expenseAmount" placeholder="Valor" min="0" step="0.01" />
+            <select id="expenseCategory">
+              <option value="alimentacao">🍎 Alimentação</option>
+              <option value="transporte">🚗 Transporte</option>
+              <option value="saude">💊 Saúde</option>
+              <option value="lazer">🎮 Lazer</option>
+              <option value="outros">🔸 Outros</option>
+            </select>
+            <button id="addExpenseBtn" class="btn small">Registrar</button>
+          </div>
+          <div class="expenses-list" id="expensesList"></div>
+          <div class="expenses-summary" id="expensesSummary"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

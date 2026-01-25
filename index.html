@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login — Nossas Financias! </title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="decor decor-left" aria-hidden="true">
+    <!-- small house + coin SVG decorative -->
+    <svg width="200" height="200" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M32 8 L8 28 H16 V56 H28 V40 H36 V56 H48 V28 H56 Z" fill="#ffffff" opacity="0.06"/>
+      <circle cx="48" cy="16" r="6" fill="#ffd24d" opacity="0.08"/>
+    </svg>
+  </div>
+
+  <div class="decor decor-right" aria-hidden="true">
+    <!-- subtle chart bars -->
+    <svg width="220" height="150" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="30" width="8" height="30" fill="#fff" opacity="0.06"/>
+      <rect x="28" y="20" width="8" height="40" fill="#fff" opacity="0.06"/>
+      <rect x="46" y="10" width="8" height="50" fill="#fff" opacity="0.06"/>
+      <rect x="64" y="25" width="8" height="35" fill="#fff" opacity="0.06"/>
+    </svg>
+  </div>
+
+  <main class="container">
+    <div class="card">
+      <h1 class="brand">Nossas Financias!</h1>
+      <p class="subtitle">Acesso seguro</p>
+
+      <form id="loginForm" class="login-form" novalidate>
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" placeholder="seu.usuario" autocomplete="username" required>
+
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+
+        <div class="actions">
+          <button type="submit" class="btn">Entrar</button>
+        </div>
+
+        <p id="message" class="message" aria-live="polite"></p>
+      </form>
+
+      <p class="hint">Dica: preencha qualquer usuário e senha para ver o comportamento (demo local).</p>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
