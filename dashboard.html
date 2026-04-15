@@ -26,7 +26,12 @@
         <p class="big" id="currentBalance">R$ 0,00</p>
       </div>
       <div class="card small-card">
-        <h3>Meta — Entrada da casa</h3>
+        <h3>Cofrinho Familiar</h3>
+        <p class="big" id="piggyAmount">R$ 0,00</p>
+        <button id="editPiggyBtn" class="btn small secondary">Editar Cofrinho</button>
+      </div>
+      <div class="card small-card">
+        <h3>Meta — <span id="goalName">Entrada da casa</span></h3>
         <p id="goalShort">R$ 0 de R$ 100.000</p>
         <div class="progress"><div id="goalBar" class="progress-fill" style="width:0%"></div></div>
       </div>
@@ -42,6 +47,26 @@
       <div class="card">
         <h3>Metas detalhadas</h3>
         <ul id="goalsList" class="goals-list"></ul>
+      </div>
+    </section>
+
+    <section class="photo-gallery-section">
+      <div class="card">
+        <div class="gallery-header">
+          <div>
+            <h3>Fotos - Condomínio Silverstone</h3>
+            <p class="subtitle-small">Registre aqui as imagens da nossa aquisição.</p>
+          </div>
+        </div>
+
+        <div class="gallery-controls">
+          <input type="text" id="photoUrlInput" placeholder="Colar URL da imagem" />
+          <button id="addPhotoUrlBtn" class="btn small">Adicionar URL</button>
+          <label class="btn small secondary upload-label" for="photoFileInput">Enviar foto</label>
+          <input type="file" id="photoFileInput" accept="image/*" hidden />
+        </div>
+
+        <div id="photoGallery" class="photo-gallery"></div>
       </div>
     </section>
   </main>
@@ -94,6 +119,8 @@
       <button class="tab-btn" data-tab="calculator">🔢 Calculadora</button>
       <button class="tab-btn" data-tab="budget">💼 Orçamento</button>
       <button class="tab-btn" data-tab="expenses">💸 Despesas</button>
+      <button class="tab-btn" data-tab="acquisitions">🏠 Aquisição</button>
+      <button class="tab-btn" data-tab="construction">🔧 Obra</button>
     </div>
     <div class="finance-content">
       <!-- ABA DASHBOARD -->
@@ -202,6 +229,45 @@
           </div>
           <div class="expenses-list" id="expensesList"></div>
           <div class="expenses-summary" id="expensesSummary"></div>
+        </div>
+      </div>
+
+      <!-- ABA AQUISIÇÃO -->
+      <div class="tab-content" id="acquisitions-tab">
+        <div class="finance-section">
+          <h4>Apartamento - 420x de R$ 1.975,92</h4>
+          <div class="acquisition-card" id="acquisitionSummary">
+            <div class="acquisition-meta">
+              <span id="acqTotalPaid">0 parcelas pagas</span>
+              <span id="acqNextDue">Próxima: 20/05/2029</span>
+            </div>
+            <div class="acquisition-actions">
+              <button id="markAllAcqPaid" class="btn small secondary">Marcar todas pagas</button>
+              <button id="resetAcqPaid" class="btn small">Limpar marcações</button>
+            </div>
+          </div>
+          <div class="payment-list" id="acquisitionsList"></div>
+        </div>
+      </div>
+
+      <!-- ABA OBRA -->
+      <div class="tab-content" id="construction-tab">
+        <div class="finance-section">
+          <h4>Evolução de obra - 20/05/2026 até 20/04/2029</h4>
+          <div class="construction-card" id="constructionSummary">
+            <div class="construction-meta">
+              <span id="constructionProgressText">0 de 36 parcelas concluídas</span>
+              <span id="constructionNextDue">Próxima: 20/05/2026</span>
+            </div>
+            <div class="construction-progress">
+              <div class="construction-progress-fill" id="constructionProgressFill" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="acquisition-actions">
+            <button id="markAllConstructionPaid" class="btn small secondary">Marcar todas pagas</button>
+            <button id="resetConstructionPaid" class="btn small">Limpar marcações</button>
+          </div>
+          <div class="payment-list" id="constructionList"></div>
         </div>
       </div>
     </div>
