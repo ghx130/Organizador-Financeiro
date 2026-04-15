@@ -20,17 +20,17 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:32px;
+  padding:20px;
   overflow:hidden;
 }
 
-.container{width:100%;max-width:420px;}
+.container{width:100%;max-width:480px;}
 .card{
   /* aplicar tema rosa/azul suave aos cards */
   background:linear-gradient(135deg, rgba(255,240,246,0.95), rgba(230,247,255,0.95));
-  border-radius:12px;
-  padding:28px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 12px 32px rgba(0,0,0,0.15);
   border:1px solid rgba(10,10,10,0.04);
 }
 .brand{margin:0;font-size:20px;color:#07344f}
@@ -72,9 +72,17 @@ body{
 .btn.small.secondary{background:transparent;color:#07344f;border:1px solid rgba(3,23,33,0.06);box-shadow:none;padding:7px 10px}
 
 .dash-main{margin-top:88px;max-width:1100px;display:block}
-.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
-.small-card{padding:16px;text-align:left}
-.small-card .big{font-size:20px;font-weight:700;margin:8px 0;color:#07344f}
+.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.small-card{
+  padding:20px;text-align:center;border-radius:14px;
+  background:linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,248,255,0.9));
+  border:1px solid rgba(3,23,33,0.06);box-shadow:0 8px 24px rgba(6,20,34,0.08);
+}
+.small-card h3{margin:0 0 8px;font-size:14px;color:#07344f;font-weight:600}
+.small-card p{margin:0;font-size:16px;font-weight:700;color:#08313a}
+.small-card .big{font-size:20px;margin-bottom:8px}
+.small-card .progress{height:6px;border-radius:3px;background:rgba(3,23,33,0.08);overflow:hidden;margin-top:8px}
+.small-card .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#ffd98b);transition:width .3s ease}
 .charts{display:none}
 .goals-list{list-style:none;padding:0;margin:0}
 .goals-list li{padding:8px 0;border-bottom:1px dashed rgba(10,10,10,0.04)}
@@ -194,28 +202,28 @@ body{
    ============================================ */
 .finance-panel{
   position:fixed;right:-100%;top:0;height:100%;width:100%;background:linear-gradient(180deg, rgba(255,245,250,0.98), rgba(230,247,255,0.98));
-  box-shadow:-6px 0 24px rgba(0,0,0,0.18);transition:right .28s cubic-bezier(.2,.9,.2,1);z-index:100;
+  box-shadow:-8px 0 32px rgba(0,0,0,0.18);transition:right .32s cubic-bezier(.2,.9,.2,1);z-index:100;
   padding:0;display:flex;flex-direction:column;overflow:hidden;
 }
 .finance-panel[aria-hidden="false"],
 .finance-panel.open{right:0}
 
 .finance-header{
-  display:flex;justify-content:space-between;align-items:center;padding:16px 20px;
+  display:flex;justify-content:space-between;align-items:center;padding:18px 24px;
   background:linear-gradient(90deg, rgba(255,200,230,0.95), rgba(200,235,255,0.95));
   border-bottom:1px solid rgba(3,23,33,0.08);
   box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
-.finance-header h3{margin:0;font-size:20px;color:#07344f}
-.finance-header .close-btn{background:transparent;border:none;font-size:18px;cursor:pointer;color:#07344f}
+.finance-header h3{margin:0;font-size:22px;color:#07344f}
+.finance-header .close-btn{background:transparent;border:none;font-size:20px;cursor:pointer;color:#07344f}
 
 .finance-tabs{
-  display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid rgba(3,23,33,0.08);
+  display:flex;gap:10px;padding:14px 24px;border-bottom:1px solid rgba(3,23,33,0.08);
   overflow-x:auto;background:rgba(255,255,255,0.4);
 }
 .tab-btn{
-  background:transparent;border:none;color:#07344f;padding:10px 14px;border-radius:8px;cursor:pointer;
-  font-size:13px;font-weight:600;white-space:nowrap;transition:all .2s ease;
+  background:transparent;border:none;color:#07344f;padding:12px 16px;border-radius:10px;cursor:pointer;
+  font-size:14px;font-weight:600;white-space:nowrap;transition:all .2s ease;
 }
 .tab-btn:hover{background:rgba(255,255,255,0.4)}
 .tab-btn.active{
@@ -223,7 +231,7 @@ body{
   box-shadow:0 4px 12px rgba(255,210,77,0.3);
 }
 
-.finance-content{flex:1;overflow-y:auto;padding:20px;background:linear-gradient(135deg, rgba(255,240,246,0.5), rgba(230,247,255,0.5))}
+.finance-content{flex:1;overflow-y:auto;padding:24px;background:linear-gradient(135deg, rgba(255,240,246,0.5), rgba(230,247,255,0.5))}
 
 .tab-content{display:none}
 .tab-content.active{display:block}
@@ -348,4 +356,70 @@ body{
   .charts-container{grid-template-columns:1fr}
   .budget-row{grid-template-columns:1fr}
   .calculator-compact{grid-template-columns:1fr}
+}
+
+.payment-list{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow-y:auto;padding-right:6px;margin-top:16px}
+.payment-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px;border-radius:12px;
+  background:linear-gradient(135deg, rgba(255,255,255,0.8), rgba(221,236,246,0.95));border:1px solid rgba(3,23,33,0.08);
+  box-shadow:0 4px 12px rgba(3,23,33,0.06);
+}
+.payment-row .payment-info{display:flex;flex-direction:column;gap:4px}
+.payment-row .payment-label{font-size:13px;font-weight:700;color:#07344f}
+.payment-row .payment-meta{font-size:12px;color:#07344f;opacity:.75}
+.payment-row .payment-amount{font-size:13px;font-weight:700;color:#08313a;text-align:right}
+
+/* Ajustes para mobile - melhor espaçamento */
+@media (max-width:768px){
+  body{padding:16px}
+  .container{max-width:100%}
+  .card{padding:20px}
+  
+  /* Cards do dashboard principal */
+  .small-card{padding:18px;margin-bottom:14px}
+  .small-card h3{font-size:14px}
+  .small-card p{font-size:15px}
+  .small-card .big{font-size:18px;margin-bottom:6px}
+  
+  /* Lista de parcelas */
+  .payment-list{gap:8px;max-height:350px;margin-top:8px}
+  .payment-row{padding:10px;gap:8px;border-radius:10px}
+  .payment-row .payment-label{font-size:12px}
+  .payment-row .payment-meta{font-size:11px}
+  .payment-row .payment-amount{font-size:12px}
+  
+  /* Cards de aquisição e obra */
+  .acquisition-card,.construction-card{padding:12px;gap:8px}
+  .acquisition-meta,.construction-meta{gap:8px;font-size:12px}
+  
+  /* Painel financeiro */
+  .finance-header{padding:12px 16px}
+  .finance-header h3{font-size:18px}
+  .finance-tabs{padding:10px 16px;gap:6px}
+  .tab-btn{padding:8px 12px;font-size:12px}
+  .finance-content{padding:16px}
+  
+  /* Tabelas e listas */
+  .budget-status-table{max-height:300px}
+  .budgets-list,.expenses-list{max-height:300px}
+  .history-list{max-height:100px}
+  
+  /* Calculadora */
+  .calc-display-compact{font-size:20px;padding:12px}
+  .calc-buttons-compact{gap:3px}
+  .calc-btn-compact{padding:8px;font-size:11px}
+  
+  /* Formulários */
+  .budget-form,.expense-form{padding:10px}
+  .budget-form input,.expense-form input,.expense-form select{padding:10px;font-size:14px}
+}
+
+/* Ajustes extras para telas muito pequenas */
+@media (max-width:480px){
+  .card{padding:16px}
+  .overview{gap:12px;margin-bottom:20px}
+  .small-card{padding:16px;margin-bottom:12px}
+  .payment-row{grid-template-columns:1fr;padding:8px}
+  .finance-tabs{overflow-x:scroll;-webkit-overflow-scrolling:touch}
+  .tab-btn{min-width:80px}
 }
