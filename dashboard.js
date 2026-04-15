@@ -10,21 +10,68 @@
 
   document.getElementById('userName').textContent = user;
 
+  const familyPrefix = 'familyShared';
+  const goalKey = `${familyPrefix}_goal`;
+  const furnitureKey = `${familyPrefix}_furnitureItems`;
+  const budgetKey = `${familyPrefix}_budgets`;
+  const expenseKey = `${familyPrefix}_expenses`;
+  const acquisitionsKey = `${familyPrefix}_acquisitions`;
+  const constructionKey = `${familyPrefix}_construction`;
+  const piggyKey = `${familyPrefix}_piggy`;
+
   // Carregar meta e valores do localStorage
-  const goalKey = `userGoal_${user}`;
   let goal = JSON.parse(localStorage.getItem(goalKey)) || {
     name: 'Entrada da casa',
     target: 100000,
     saved: 21500
   };
 
+  let piggy = loadPiggy();
+
   function saveGoal(){
     localStorage.setItem(goalKey, JSON.stringify(goal));
+  }
+
+  function loadPiggy(){
+    try{
+      const raw = localStorage.getItem(piggyKey);
+      if(raw) return JSON.parse(raw);
+    } catch(e){ console.warn('Erro ao carregar cofrinho', e); }
+    const initial = { amount: 0, note: 'Cofrinho familiar' };
+    localStorage.setItem(piggyKey, JSON.stringify(initial));
+    return initial;
+  }
+
+  function savePiggy(){
+    localStorage.setItem(piggyKey, JSON.stringify(piggy));
+    updatePiggyDisplay();
+  }
+
+  function updatePiggyDisplay(){
+    const piggyAmountEl = document.getElementById('piggyAmount');
+    if(piggyAmountEl){
+      piggyAmountEl.textContent = formatBRL(piggy.amount);
+      piggyAmountEl.title = piggy.note || 'Cofrinho familiar';
+    }
+  }
+
+  function editPiggy(){
+    const input = prompt('Valor atual do cofrinho (R$):', piggy.amount.toFixed(2));
+    if(input === null) return;
+    const newValue = parseFloat(input.replace(',', '.'));
+    if(isNaN(newValue) || newValue < 0){
+      showToast('Valor inválido para o cofrinho');
+      return;
+    }
+    piggy.amount = Math.round(newValue * 100) / 100;
+    savePiggy();
+    showToast('Cofrinho atualizado');
   }
 
   function updateGoalDisplay(){
     document.getElementById('currentBalance').textContent = formatBRL(goal.saved);
     document.getElementById('lastMonth').textContent = formatBRL(goal.saved);
+    document.getElementById('goalName').textContent = goal.name;
     document.getElementById('goalShort').textContent = `${formatBRL(goal.saved)} de ${formatBRL(goal.target)}`;
     const pct = Math.min(100, Math.round((goal.saved/goal.target)*100));
     document.getElementById('goalBar').style.width = pct + '%';
@@ -35,6 +82,84 @@
     li.innerHTML = `<strong>${goal.name}</strong> — ${formatBRL(goal.saved)} / ${formatBRL(goal.target)} (${pct}%)`;
     goalsList.appendChild(li);
   }
+
+  function loadPhotoGallery(){
+    try{
+      const raw = localStorage.getItem(`${familyPrefix}_silverstonePhotos`);
+      if(raw) return JSON.parse(raw);
+    } catch(e){ console.warn('Erro ao carregar galeria Silverstone', e); }
+    const initial = [];
+    localStorage.setItem(`${familyPrefix}_silverstonePhotos`, JSON.stringify(initial));
+    return initial;
+  }
+
+  function savePhotoGallery(){
+    localStorage.setItem(`${familyPrefix}_silverstonePhotos`, JSON.stringify(photoGallery));
+    renderPhotoGallery();
+  }
+
+  function renderPhotoGallery(){
+    const gallery = document.getElementById('photoGallery');
+    if(!gallery) return;
+    gallery.innerHTML = '';
+    if(photoGallery.length === 0){
+      const msg = document.createElement('p');
+      msg.style.cssText = 'padding:16px;color:#07344f;text-align:center';
+      msg.textContent = 'Nenhuma foto adicionada ainda para o Silverstone.';
+      gallery.appendChild(msg);
+      return;
+    }
+    photoGallery.forEach((photo, index)=>{
+      const card = document.createElement('div');
+      card.className = 'photo-card';
+      card.innerHTML = `
+        <img src="${photo.src}" alt="Foto Silverstone ${index+1}" />
+        <div class="photo-actions">
+          <button type="button" data-index="${index}" class="remove-photo">Excluir</button>
+        </div>
+        ${photo.caption ? `<div class="photo-caption">${photo.caption}</div>` : ''}
+      `;
+      gallery.appendChild(card);
+    });
+    Array.from(gallery.querySelectorAll('.remove-photo')).forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = Number(btn.getAttribute('data-index'));
+        photoGallery.splice(idx, 1);
+        savePhotoGallery();
+      });
+    });
+  }
+
+  function addPhotoUrl(){
+    const input = document.getElementById('photoUrlInput');
+    if(!input) return;
+    const url = input.value.trim();
+    if(!url){ showToast('Cole a URL da foto para adicionar.'); return; }
+    photoGallery.unshift({ src: url, caption: 'Silverstone' });
+    input.value = '';
+    savePhotoGallery();
+    showToast('Foto adicionada ao Silverstone!');
+  }
+
+  function handlePhotoFile(event){
+    const file = event.target.files && event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(){
+      photoGallery.unshift({ src: reader.result, caption: 'Silverstone' });
+      savePhotoGallery();
+      showToast('Foto enviada ao Silverstone!');
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  }
+
+  const photoGallery = loadPhotoGallery();
+  const addPhotoUrlBtn = document.getElementById('addPhotoUrlBtn');
+  const photoFileInput = document.getElementById('photoFileInput');
+  if(addPhotoUrlBtn) addPhotoUrlBtn.addEventListener('click', addPhotoUrl);
+  if(photoFileInput) photoFileInput.addEventListener('change', handlePhotoFile);
+  renderPhotoGallery();
 
   // Tornar elementos clicáveis
   const currentBalanceEl = document.getElementById('currentBalance');
@@ -70,12 +195,32 @@
     }
   });
 
+  const goalNameEl = document.getElementById('goalName');
+  if(goalNameEl){
+    goalNameEl.style.cursor = 'pointer';
+    goalNameEl.title = 'Clique para editar o nome da meta';
+    goalNameEl.addEventListener('click', ()=>{
+      const input = prompt('Nome da meta:', goal.name);
+      if(input !== null){
+        const newName = input.trim();
+        if(newName.length > 0){
+          goal.name = newName;
+          saveGoal();
+          updateGoalDisplay();
+          showToast('Nome da meta atualizado');
+        }
+      }
+    });
+  }
+
   updateGoalDisplay();
+  updatePiggyDisplay();
+  const editPiggyBtn = document.getElementById('editPiggyBtn');
+  if(editPiggyBtn){ editPiggyBtn.addEventListener('click', editPiggy); }
 
   // ======================
   // Painel lateral: móveis
   // ======================
-  const furnitureKey = `furnitureItems_${user}`;
   const defaultItems = [
     {id: genId(), name:'Sofá', bought:false, price:null, priority:null, category:'mobilia'},
     {id: genId(), name:'Geladeira', bought:false, price:2500, priority:2, category:'cozinha'},
@@ -471,7 +616,6 @@
   const budgetAmountInput = document.getElementById('budgetAmount');
   const addBudgetBtn = document.getElementById('addBudgetBtn');
   const budgetsList = document.getElementById('budgetsList');
-  const budgetKey = `userBudgets_${user}`;
   let budgets = loadBudgets();
 
   function loadBudgets(){
@@ -551,7 +695,6 @@
   const addExpenseBtn = document.getElementById('addExpenseBtn');
   const expensesList = document.getElementById('expensesList');
   const expensesSummary = document.getElementById('expensesSummary');
-  const expenseKey = `userExpenses_${user}`;
   let expenses = loadExpenses();
 
   function loadExpenses(){
@@ -651,6 +794,168 @@
 
   expenseDescInput.addEventListener('keypress', (e)=>{ if(e.key === 'Enter') addExpenseBtn.click(); });
   renderExpenses();
+
+  // AQUISIÇÃO E OBRA
+  const acquisitionsList = document.getElementById('acquisitionsList');
+  const acquisitionSummary = document.getElementById('acquisitionSummary');
+  const acqTotalPaid = document.getElementById('acqTotalPaid');
+  const acqNextDue = document.getElementById('acqNextDue');
+  const markAllAcqPaid = document.getElementById('markAllAcqPaid');
+  const resetAcqPaid = document.getElementById('resetAcqPaid');
+  const constructionList = document.getElementById('constructionList');
+  const constructionProgressText = document.getElementById('constructionProgressText');
+  const constructionNextDue = document.getElementById('constructionNextDue');
+  const constructionProgressFill = document.getElementById('constructionProgressFill');
+  const markAllConstructionPaid = document.getElementById('markAllConstructionPaid');
+  const resetConstructionPaid = document.getElementById('resetConstructionPaid');
+
+  let acquisitions = loadAcquisitions();
+  let constructions = loadConstruction();
+
+  function loadAcquisitions(){
+    try{
+      const raw = localStorage.getItem(acquisitionsKey);
+      if(raw) return JSON.parse(raw);
+      const initial = [createApartmentAcquisition()];
+      localStorage.setItem(acquisitionsKey, JSON.stringify(initial));
+      return initial;
+    } catch(e){ console.warn('Erro ao carregar aquisições', e); return [createApartmentAcquisition()]; }
+  }
+
+  function loadConstruction(){
+    try{
+      const raw = localStorage.getItem(constructionKey);
+      if(raw) return JSON.parse(raw);
+      const initial = [createConstructionProject()];
+      localStorage.setItem(constructionKey, JSON.stringify(initial));
+      return initial;
+    } catch(e){ console.warn('Erro ao carregar obra', e); return [createConstructionProject()]; }
+  }
+
+  function saveAcquisitions(){ localStorage.setItem(acquisitionsKey, JSON.stringify(acquisitions)); renderAcquisitions(); }
+  function saveConstruction(){ localStorage.setItem(constructionKey, JSON.stringify(constructions)); renderConstruction(); }
+
+  function createApartmentAcquisition(){
+    const installments = [];
+    const start = new Date(2029, 4, 20);
+    for(let i = 0; i < 420; i++){
+      installments.push({ number: i + 1, due: toDateString(addMonths(start, i)), amount: 1975.92, paid: false });
+    }
+    return { id: genId(), name: 'Apartamento - 420x de R$ 1.975,92', startDate: '2029-05-20', installments };
+  }
+
+  function createConstructionProject(){
+    const installments = [];
+    const start = new Date(2026, 4, 20);
+    const months = 36;
+    const startValue = 351.83;
+    const endValue = 1789.59;
+    for(let i = 0; i < months; i++){
+      const amount = Number((startValue + ((endValue - startValue) * (i / (months - 1)))).toFixed(2));
+      installments.push({ number: i + 1, due: toDateString(addMonths(start, i)), amount, paid: false });
+    }
+    return { id: genId(), name: 'Evolução de obra', startDate: '2026-05-20', endDate: '2029-04-20', installments };
+  }
+
+  function addMonths(date, count){
+    const result = new Date(date);
+    const d = result.getDate();
+    result.setMonth(result.getMonth() + count);
+    if(result.getDate() !== d){ result.setDate(0); }
+    return result;
+  }
+
+  function toDateString(date){
+    return date.toISOString().slice(0,10);
+  }
+
+  function formatDateBR(dateString){
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  function renderAcquisitions(){
+    acquisitionsList.innerHTML = '';
+    const acquisition = acquisitions[0];
+    if(!acquisition){ acquisitionsList.innerHTML = '<p style="padding:16px;color:#07344f;">Nenhuma aquisição cadastrada.</p>'; return; }
+    const paidCount = acquisition.installments.filter(p=>p.paid).length;
+    const nextDue = acquisition.installments.find(p=>!p.paid);
+    acqTotalPaid.textContent = `${paidCount} de ${acquisition.installments.length} parcelas pagas`;
+    acqNextDue.textContent = nextDue ? `Próxima: ${formatDateBR(nextDue.due)}` : 'Todas pagas';
+    acquisition.installments.forEach(payment=>{
+      const row = document.createElement('div');
+      row.className = 'payment-row';
+      row.innerHTML = `
+        <label class="payment-info">
+          <div class="payment-label"><input type="checkbox" data-id="${payment.number}" ${payment.paid ? 'checked' : ''}> Parcela ${payment.number.toString().padStart(3,'0')}</div>
+          <div class="payment-meta">Vence em ${formatDateBR(payment.due)}</div>
+        </label>
+        <div class="payment-amount">${formatBRL(payment.amount)}</div>
+      `;
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      checkbox.addEventListener('change', ()=>{
+        payment.paid = checkbox.checked;
+        saveAcquisitions();
+      });
+      acquisitionsList.appendChild(row);
+    });
+  }
+
+  function renderConstruction(){
+    constructionList.innerHTML = '';
+    const project = constructions[0];
+    if(!project){ constructionList.innerHTML = '<p style="padding:16px;color:#07344f;">Nenhum projeto de obra cadastrado.</p>'; return; }
+    const paidCount = project.installments.filter(p=>p.paid).length;
+    const total = project.installments.length;
+    const nextDue = project.installments.find(p=>!p.paid);
+    constructionProgressText.textContent = `${paidCount} de ${total} parcelas concluídas`;
+    constructionNextDue.textContent = nextDue ? `Próxima: ${formatDateBR(nextDue.due)}` : 'Todas pagas';
+    constructionProgressFill.style.width = `${Math.round((paidCount / total) * 100)}%`;
+    project.installments.forEach(payment=>{
+      const row = document.createElement('div');
+      row.className = 'payment-row';
+      row.innerHTML = `
+        <label class="payment-info">
+          <div class="payment-label"><input type="checkbox" data-id="${payment.number}" ${payment.paid ? 'checked' : ''}> Parcela ${payment.number.toString().padStart(2,'0')}</div>
+          <div class="payment-meta">Vence em ${formatDateBR(payment.due)}</div>
+        </label>
+        <div class="payment-amount">${formatBRL(payment.amount)}</div>
+      `;
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      checkbox.addEventListener('change', ()=>{
+        payment.paid = checkbox.checked;
+        saveConstruction();
+      });
+      constructionList.appendChild(row);
+    });
+  }
+
+  markAllAcqPaid.addEventListener('click', ()=>{
+    acquisitions[0].installments.forEach(p=>p.paid = true);
+    saveAcquisitions();
+    showToast('Todas parcelas da aquisição marcadas como pagas');
+  });
+
+  resetAcqPaid.addEventListener('click', ()=>{
+    acquisitions[0].installments.forEach(p=>p.paid = false);
+    saveAcquisitions();
+    showToast('Marcação de pagamento da aquisição limpa');
+  });
+
+  markAllConstructionPaid.addEventListener('click', ()=>{
+    constructions[0].installments.forEach(p=>p.paid = true);
+    saveConstruction();
+    showToast('Todas parcelas da obra marcadas como pagas');
+  });
+
+  resetConstructionPaid.addEventListener('click', ()=>{
+    constructions[0].installments.forEach(p=>p.paid = false);
+    saveConstruction();
+    showToast('Marcação de pagamento da obra limpa');
+  });
+
+  renderAcquisitions();
+  renderConstruction();
 
   // DASHBOARD
   let expenseChart = null;
